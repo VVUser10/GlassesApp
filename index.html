@@ -285,45 +285,31 @@
                 return;
             }
 
-            log('Отправка выгруженного фото в Gemini Vision...');
+            log('Отправка картинки в Gemini Vision...');
             await sendImageToGemini(selectedBase64Image, apiKey);
         }
 
-async function sendImageToGemini(base64Data, apiKey) {
-    try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-        
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{
-                    parts: [
-                        { text: "Что на этом фото? Ответь кратко на русском языке, максимум 5 слов, без спецсимволов." },
-                        {
-                            inlineData: {
-                                mimeType: "image/jpeg",
-                                data: base64Data
-                            }
-                        }
-                    ]
-                }]
-            })
-        });
-
-        const data = await response.json();
-        if (data.error) throw new Error(data.error.message);
-
-        const answer = data.candidates[0].content.parts[0].text.trim();
-        log(`Успех! Ответ Gemini: "${answer}"`);
-        document.getElementById('aiResponseText').innerText = answer;
-        sendTextToGlasses(answer);
-
-    } catch (err) {
-        log(`Ошибка распознавания фото: ${err.message}`);
-        document.getElementById('aiResponseText').innerText = "Ошибка ИИ";
-    }
-}
+        async function sendImageToGemini(base64Data, apiKey) {
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [
+                                { text: "Что изображено на этом фото? Ответь кратко на русском языке, максимум 5 слов, без спецсимволов." },
+                                {
+                                    inlineData: {
+                                        mimeType: "image/jpeg",
+                                        data: base64Data
+                                    }
+                                }
+                            ]
+                        }]
+                    })
+                });
 
                 const data = await response.json();
                 if (data.error) throw new Error(data.error.message);
