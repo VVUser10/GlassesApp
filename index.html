@@ -271,8 +271,11 @@
                 const previewEl = document.getElementById('photoPreview');
                 previewEl.src = e.target.result;
                 previewEl.style.display = 'block';
-                selectedBase64Image = e.target.result.split(',')[1];
-                log('Картинка загружена с ПК и готова к отправке!');
+                
+                let rawBase64 = e.target.result.split(',')[1];
+                selectedBase64Image = rawBase64.replace(/[\r\n\s]/g, '');
+                
+                log('Картинка загружена и подготовлена!');
             };
             reader.readAsDataURL(file);
         }
@@ -285,12 +288,13 @@
                 return;
             }
 
-            log('Отправка картинки в Gemini Vision...');
+            log('Отправка фото в Gemini Vision...');
             await sendImageToGemini(selectedBase64Image, apiKey);
         }
 
         async function sendImageToGemini(base64Data, apiKey) {
             try {
+                const cleanBase64 = base64Data.replace(/[\r\n\s]/g, '');
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
                 
                 const response = await fetch(url, {
@@ -299,11 +303,11 @@
                     body: JSON.stringify({
                         contents: [{
                             parts: [
-                                { text: "Что изображено на этом фото? Ответь кратко на русском языке, максимум 5 слов, без спецсимволов." },
+                                { text: "Опиши кратко, что на фото. Ответ до 5 слов на русском языке, без спецсимволов." },
                                 {
                                     inlineData: {
                                         mimeType: "image/jpeg",
-                                        data: base64Data
+                                        data: cleanBase64
                                     }
                                 }
                             ]
