@@ -3,407 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Glasses AI Bridge - Gemini Test</title>
-    <link rel="manifest" href="manifest.json">
+    <title>ArGlasses Control Hub</title>
     <style>
-        :root {
-            --bg-color: #0d1117;
-            --card-bg: #161b22;
-            --accent-color: #58a6ff;
-            --text-color: #c9d1d9;
-            --success-color: #2ea043;
-            --error-color: #f85149;
-            --border-color: #30363d;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            min-height: 100vh;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .header {
-            text-align: center;
-            padding: 10px 0;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .header h1 {
-            font-size: 1.4rem;
-            color: var(--accent-color);
-        }
-
-        .card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .card-title {
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #8b949e;
-            font-weight: 600;
-        }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .input-group label {
-            font-size: 0.8rem;
-            color: #8b949e;
-        }
-
-        .input-group input {
-            background-color: #010409;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 10px;
-            color: #fff;
-            font-size: 0.9rem;
-            width: 100%;
-        }
-
-        .btn {
-            background-color: var(--accent-color);
-            color: #ffffff;
-            border: none;
-            border-radius: 8px;
-            padding: 12px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-
-        .btn:active {
-            opacity: 0.8;
-        }
-
-        .btn-green {
-            background-color: var(--success-color);
-        }
-
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: bold;
-        }
-
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background-color: var(--error-color);
-        }
-
-        .status-dot.connected {
-            background-color: var(--success-color);
-            box-shadow: 0 0 8px var(--success-color);
-        }
-
-        .log-box {
-            background-color: #010409;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 12px;
-            font-family: monospace;
-            font-size: 0.85rem;
-            height: 150px;
-            overflow-y: auto;
-            color: #7ee787;
-            white-space: pre-wrap;
-            word-break: break-all;
-        }
-
-        .preview-box {
-            width: 100%;
-            max-height: 180px;
-            object-fit: contain;
-            border-radius: 8px;
-            background-color: #000;
-            display: none;
-        }
+        :root { --bg: #09090b; --card: #18181b; --text: #e4e4e7; --accent: #8b5cf6; --green: #10b981; }
+        body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; max-width: 500px; margin: 0 auto; }
+        h1 { font-size: 1.5rem; text-align: center; color: var(--accent); margin-bottom: 20px; }
+        .card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #27272a; }
+        .title { font-size: 0.9rem; font-weight: bold; color: #a1a1aa; margin-bottom: 10px; text-transform: uppercase; }
+        input[type="text"], input[type="password"] { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #3f3f46; background: #000; color: white; margin-bottom: 10px; box-sizing: border-box;}
+        button { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--accent); color: white; font-weight: bold; font-size: 1rem; cursor: pointer; margin-bottom: 8px; }
+        button:active { opacity: 0.8; }
+        .btn-green { background: var(--green); }
+        .btn-dark { background: #3f3f46; }
+        .log { background: #000; padding: 10px; font-family: monospace; font-size: 0.8rem; height: 100px; overflow-y: auto; border-radius: 8px; color: #10b981; }
+        #cameraPreview { width: 100%; border-radius: 8px; display: none; margin-bottom: 10px; border: 2px solid var(--accent); }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>👓 Smart Glasses AI Bridge</h1>
+    <h1>👓 ArGlasses Hub</h1>
+
+    <div class="card">
+        <div class="title">1. Связь & Настройки</div>
+        <input type="password" id="apiKey" placeholder="Gemini API Key">
+        <button id="connectBtn" onclick="connectBLE()">📡 Подключить ArGlasses</button>
     </div>
 
-    <!-- 1. API Key Card -->
     <div class="card">
-        <div class="card-title">1. Настройка Gemini API</div>
-        <div class="input-group">
-            <label for="apiKey">Ваш Gemini API Key:</label>
-            <input type="password" id="apiKey" placeholder="Вставьте ваш API ключ сюда">
-        </div>
+        <div class="title">📷 Умное зрение (AI)</div>
+        <p style="font-size: 0.8rem; color: #a1a1aa;">Нажми кнопку на очках, чтобы сделать фото.</p>
+        <img id="cameraPreview" alt="Снимок с очков">
+        <div id="aiResponse" style="color: var(--accent); font-weight: bold; min-height: 20px;">Ожидание фото...</div>
     </div>
 
-    <!-- 2. Test Text Query Card -->
     <div class="card">
-        <div class="card-title">2. Тест Gemini (Текст)</div>
-        <div class="input-group">
-            <label for="testPrompt">Введите запрос к нейросети:</label>
-            <input type="text" id="testPrompt" value="Привет! Что ты умеешь делать?">
-        </div>
-        <button class="btn btn-green" onclick="testGeminiText()">Отправить запрос на ПК/Телефоне</button>
+        <div class="title">📝 Шпаргалка / Прямой текст</div>
+        <input type="text" id="cheatText" placeholder="Введи текст для экрана очков" maxlength="40">
+        <button class="btn-dark" onclick="sendCustomText()">Отправить на очки</button>
     </div>
 
-    <!-- 3. Test Image Upload Card -->
     <div class="card">
-        <div class="card-title">3. Тест Фото (Выбор файла с ПК)</div>
-        <div class="input-group">
-            <label for="imageInput">Выберите картинку для проверки распознавания:</label>
-            <input type="file" id="imageInput" accept="image/*" onchange="previewSelectedImage(event)">
-        </div>
-        <img id="photoPreview" class="preview-box" alt="Предпросмотр фото">
-        <button class="btn" onclick="testGeminiImage()">Распознать выбранное фото</button>
+        <div class="title">🎙 Шпионский диктофон</div>
+        <button class="btn-green" id="micBtn" onclick="startDictation()">Начать прослушивание</button>
     </div>
 
-    <!-- 4. Bluetooth Connection Card -->
     <div class="card">
-        <div class="card-title">4. Связь с Очками по Bluetooth</div>
-        <div class="status-badge">
-            <div id="statusDot" class="status-dot"></div>
-            <span id="statusText">Не подключено</span>
-        </div>
-        <button id="connectBtn" class="btn" onclick="connectBLE()">Подключить очки (BLE)</button>
+        <div class="title">⌚ Инструменты</div>
+        <button class="btn-dark" onclick="sendTime()">Отправить текущее время</button>
     </div>
 
-    <!-- 5. Output Card -->
     <div class="card">
-        <div class="card-title">Ответ Gemini (для OLED экрана):</div>
-        <div id="aiResponseText" style="font-size: 1.2rem; font-weight: bold; color: #58a6ff;">-</div>
-    </div>
-
-    <!-- Log Box -->
-    <div class="card">
-        <div class="card-title">Лог событий</div>
-        <div id="logBox" class="log-box">Приложение готово к тесту...</div>
+        <div class="title">Лог системы</div>
+        <div class="log" id="logBox">Система загружена...</div>
     </div>
 
     <script>
         const SERVICE_UUID = '4fae8f08-58a2-476e-b14c-c92d516bad59';
-        const CHARACTERISTIC_UUID_IMAGE = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
-        const CHARACTERISTIC_UUID_TEXT = '6e400003-b5a3-f393-e0a9-e50e24dcca9e';
+        const CHAR_IMAGE = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
+        const CHAR_TEXT = '6e400003-b5a3-f393-e0a9-e50e24dcca9e';
 
-        let bleDevice = null;
-        let gattServer = null;
-        let textCharacteristic = null;
+        let textChar = null;
         let imageBuffer = [];
-        let selectedBase64Image = null;
+        let receivingImage = false;
 
         function log(msg) {
-            const logBox = document.getElementById('logBox');
-            logBox.innerText += `\n[${new Date().toLocaleTimeString()}] ${msg}`;
-            logBox.scrollTop = logBox.scrollHeight;
-        }
-
-        function getApiKey() {
-            const key = document.getElementById('apiKey').value.trim();
-            if (!key) {
-                alert('Пожалуйста, вставьте ваш Gemini API Key в первом поле!');
-                return null;
-            }
-            return key;
-        }
-
-        async function testGeminiText() {
-            const apiKey = getApiKey();
-            if (!apiKey) return;
-
-            const prompt = document.getElementById('testPrompt').value;
-            log(`Отправка текстового запроса: "${prompt}"...`);
-
-            try {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: prompt }] }]
-                    })
-                });
-
-                const data = await response.json();
-                if (data.error) throw new Error(data.error.message);
-
-                const answer = data.candidates[0].content.parts[0].text.trim();
-                log(`Ответ Gemini: ${answer}`);
-                document.getElementById('aiResponseText').innerText = answer;
-                sendTextToGlasses(answer);
-
-            } catch (err) {
-                log(`Ошибка Gemini: ${err.message}`);
-            }
-        }
-
-        function previewSelectedImage(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const previewEl = document.getElementById('photoPreview');
-                previewEl.src = e.target.result;
-                previewEl.style.display = 'block';
-                
-                let rawBase64 = e.target.result.split(',')[1];
-                selectedBase64Image = rawBase64.replace(/[\r\n\s]/g, '');
-                
-                log('Картинка загружена и подготовлена!');
-            };
-            reader.readAsDataURL(file);
-        }
-
-        async function testGeminiImage() {
-            const apiKey = getApiKey();
-            if (!apiKey) return;
-            if (!selectedBase64Image) {
-                alert('Сначала выберите файл картинки!');
-                return;
-            }
-
-            log('Отправка фото в Gemini Vision...');
-            await sendImageToGemini(selectedBase64Image, apiKey);
-        }
-
-        async function sendImageToGemini(base64Data, apiKey) {
-            try {
-                const cleanBase64 = base64Data.replace(/[\r\n\s]/g, '');
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
-                
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [
-                                { text: "Опиши кратко, что на фото. Ответ до 5 слов на русском языке, без спецсимволов." },
-                                {
-                                    inlineData: {
-                                        mimeType: "image/jpeg",
-                                        data: cleanBase64
-                                    }
-                                }
-                            ]
-                        }]
-                    })
-                });
-
-                const data = await response.json();
-                if (data.error) throw new Error(data.error.message);
-
-                const answer = data.candidates[0].content.parts[0].text.trim();
-                log(`Успех! Ответ Gemini: "${answer}"`);
-                document.getElementById('aiResponseText').innerText = answer;
-                sendTextToGlasses(answer);
-
-            } catch (err) {
-                log(`Ошибка распознавания фото: ${err.message}`);
-                document.getElementById('aiResponseText').innerText = "Ошибка ИИ";
-            }
+            const lb = document.getElementById('logBox');
+            lb.innerText += `\n> ${msg}`;
+            lb.scrollTop = lb.scrollHeight;
         }
 
         async function connectBLE() {
             try {
-                log('Поиск очков по Bluetooth...');
-                bleDevice = await navigator.bluetooth.requestDevice({
-                    filters: [{ namePrefix: 'Glasses' }, { namePrefix: 'ESP32' }, { namePrefix: 'ArGlasses' }],
+                log("Ищем ArGlasses...");
+                const device = await navigator.bluetooth.requestDevice({
+                    filters: [{ namePrefix: 'ArGlasses' }],
                     optionalServices: [SERVICE_UUID]
                 });
-
-                log(`Найдено устройство: ${bleDevice.name}`);
-                bleDevice.addEventListener('gattserverdisconnected', onDisconnected);
-
-                gattServer = await bleDevice.gatt.connect();
-                log('Подключено к GATT серверу!');
-
-                const service = await gattServer.getPrimaryService(SERVICE_UUID);
+                const server = await device.gatt.connect();
+                const service = await server.getPrimaryService(SERVICE_UUID);
                 
-                const imageChar = await service.getCharacteristic(CHARACTERISTIC_UUID_IMAGE);
-                await imageChar.startNotifications();
-                imageChar.addEventListener('characteristicvaluechanged', handleIncomingImageChunk);
+                const imgChar = await service.getCharacteristic(CHAR_IMAGE);
+                await imgChar.startNotifications();
+                imgChar.addEventListener('characteristicvaluechanged', handleImageChunk);
 
-                textCharacteristic = await service.getCharacteristic(CHARACTERISTIC_UUID_TEXT);
-
-                document.getElementById('statusDot').classList.add('connected');
-                document.getElementById('statusText').innerText = 'Очки Подключены';
-                document.getElementById('connectBtn').innerText = 'Отключить';
-
-                log('Готово к работе с очками!');
-
-            } catch (error) {
-                log(`Ошибка BLE: ${error.message}`);
-            }
+                textChar = await service.getCharacteristic(CHAR_TEXT);
+                
+                document.getElementById('connectBtn').innerText = "✅ Очки Подключены";
+                document.getElementById('connectBtn').style.background = "var(--green)";
+                log("Успешное подключение!");
+            } catch (e) { log("Ошибка BLE: " + e); }
         }
 
-        function onDisconnected() {
-            log('Очки отключены!');
-            document.getElementById('statusDot').classList.remove('connected');
-            document.getElementById('statusText').innerText = 'Не подключено';
-            document.getElementById('connectBtn').innerText = 'Подключить очки (BLE)';
-        }
-
-        function handleIncomingImageChunk(event) {
-            const value = event.target.value;
-            const chunk = new Uint8Array(value.buffer);
-
+        function handleImageChunk(event) {
+            const chunk = new Uint8Array(event.target.value.buffer);
+            
+            // Если находим начало JPEG (FF D8)
             if (chunk.length >= 2 && chunk[0] === 0xFF && chunk[1] === 0xD8) {
                 imageBuffer = [];
-                log('Прием фото с очков...');
+                receivingImage = true;
+                log("Начат прием фото...");
+                document.getElementById('aiResponse').innerText = "Загрузка фото по BLE...";
             }
 
-            for (let i = 0; i < chunk.length; i++) {
-                imageBuffer.push(chunk[i]);
+            if (receivingImage) {
+                for (let i = 0; i < chunk.length; i++) imageBuffer.push(chunk[i]);
             }
 
-            if (chunk.length >= 2 && chunk[chunk.length - 2] === 0xFF && chunk[chunk.length - 1] === 0xD9) {
-                log('Фото с очков получено полностью!');
+            // Если находим конец JPEG (FF D9)
+            if (receivingImage && chunk.length >= 2 && chunk[chunk.length - 2] === 0xFF && chunk[chunk.length - 1] === 0xD9) {
+                receivingImage = false;
+                log(`Фото получено! Размер: ${imageBuffer.length} байт`);
+                
                 const binary = String.fromCharCode.apply(null, new Uint8Array(imageBuffer));
                 const base64 = btoa(binary);
                 
-                const apiKey = getApiKey();
-                if (apiKey) {
-                    sendImageToGemini(base64, apiKey);
-                }
+                document.getElementById('cameraPreview').src = 'data:image/jpeg;base64,' + base64;
+                document.getElementById('cameraPreview').style.display = 'block';
+                
+                processImageToGemini(base64);
+            }
+        }
+
+        async function processImageToGemini(base64Data) {
+            const key = document.getElementById('apiKey').value;
+            if(!key) { log("Введи API ключ!"); return; }
+            
+            log("Отправка в Gemini...");
+            document.getElementById('aiResponse').innerText = "Анализ нейросетью...";
+
+            try {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${key}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [
+                            { text: "Кратко и понятно опиши что на фото. Ответ до 5 слов." },
+                            { inlineData: { mimeType: "image/jpeg", data: base64Data } }
+                        ]}]
+                    })
+                });
+                const data = await res.json();
+                const text = data.candidates[0].content.parts[0].text.trim();
+                
+                document.getElementById('aiResponse').innerText = text;
+                log("Gemini: " + text);
+                sendTextToGlasses(text);
+            } catch (e) {
+                log("Ошибка Gemini: " + e);
             }
         }
 
         async function sendTextToGlasses(text) {
-            if (!textCharacteristic) return;
+            if (!textChar) { log("Очки не подключены!"); return; }
             try {
+                // Обрезаем до 60 символов, чтобы не перегрузить дисплей 0.49"
+                const safeText = text.substring(0, 60); 
                 const encoder = new TextEncoder();
-                const data = encoder.encode(text);
-                await textCharacteristic.writeValue(data);
-                log('Текст передан на очки!');
-            } catch (err) {
-                log(`Ошибка отправки на очки: ${err.message}`);
-            }
+                await textChar.writeValue(encoder.encode(safeText));
+                log("-> Текст на дисплее!");
+            } catch (e) { log("Ошибка отправки: " + e); }
+        }
+
+        function sendCustomText() {
+            const txt = document.getElementById('cheatText').value;
+            if(txt) sendTextToGlasses(txt);
+        }
+
+        function sendTime() {
+            const now = new Date();
+            const timeStr = `Time:\n${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+            sendTextToGlasses(timeStr);
+        }
+
+        function startDictation() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) { log("Браузер не поддерживает диктофон"); return; }
+            
+            const btn = document.getElementById('micBtn');
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'ru-RU';
+            recognition.interimResults = false;
+            
+            recognition.onstart = () => { btn.innerText = "Слушаю..."; btn.style.background = "#ef4444"; log("Микрофон включен"); };
+            recognition.onresult = (e) => {
+                const text = e.results[0][0].transcript;
+                log("Услышано: " + text);
+                sendTextToGlasses(text);
+            };
+            recognition.onend = () => { btn.innerText = "Начать прослушивание"; btn.style.background = "var(--green)"; };
+            recognition.start();
         }
     </script>
 </body>
